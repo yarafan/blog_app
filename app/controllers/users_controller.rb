@@ -3,7 +3,11 @@ class UsersController < ApplicationController
   before_action :correct_user,   only: [:edit, :update]
   before_action :admin_user,     only: :destroy
   def new
+      if signed_in?
+        redirect_to root_url
+      else
   	@user = User.new
+      end
   end
 
   def index
@@ -15,6 +19,9 @@ class UsersController < ApplicationController
   end
 
   def create
+    if signed_in?
+      redirect_to root_url
+    else
     @user = User.new(user_params)    # Not the final implementation!
     if @user.save
       sign_in @user
@@ -23,6 +30,7 @@ class UsersController < ApplicationController
     else
        render 'new'
   	end
+  end
   end
 
   def edit
@@ -37,15 +45,19 @@ class UsersController < ApplicationController
     end
   end
   def destroy
+    if admin_user?
+      redirect_to root_url
+    else
     User.find(params[:id]).destroy
     flash[:success] = "User deleted."
     redirect_to users_url
+  end
   end
 
   private
 	def user_params
       params.require(:user).permit(:name, :email, :password,
-                                   :password_confirmation)
+                                   :password_confirmation, :admin)
     end
      # Before filters
 
